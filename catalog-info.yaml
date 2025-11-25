@@ -1,0 +1,9 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backstage-idp-demo
+  description: Internal Developer Platform demo for Cloud Native Latam Summit 2025
+spec:
+  type: website
+  owner: guests
+  lifecycle: experimental

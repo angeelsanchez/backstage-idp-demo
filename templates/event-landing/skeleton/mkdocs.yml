@@ -1,0 +1,7 @@
+site_name: ${{ values.name }}
+site_description: Documentation for ${{ values.name }}
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+plugins:
+  - techdocs-core

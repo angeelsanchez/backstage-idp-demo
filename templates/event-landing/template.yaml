@@ -1,0 +1,88 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: event-landing-template
+  title: Event Landing Page
+  description: Creates a landing page for Cloud Native events with full GitOps pipeline
+  tags:
+    - landing
+    - kubernetes
+    - argocd
+    - gitops
+spec:
+  owner: guests
+  type: website
+
+  parameters:
+    - title: Application Configuration
+      required:
+        - name
+        - quayNamespace
+      properties:
+        name:
+          title: Application Name
+          type: string
+          description: Unique name for the application (lowercase, no spaces)
+          ui:autofocus: true
+          pattern: '^[a-z0-9-]+$'
+        description:
+          title: Description
+          type: string
+          description: Brief description of the application
+          default: Landing page for Cloud Native Latam Summit
+        quayNamespace:
+          title: Quay.io Namespace
+          type: string
+          description: Your Quay.io username or organization
+
+    - title: Repository Configuration
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+  steps:
+    - id: fetch
+      name: Fetch Skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          owner: ${{ (parameters.repoUrl | parseRepoUrl).owner }}
+          repo: ${{ parameters.name }}
+          quayNamespace: ${{ parameters.quayNamespace }}
+
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        description: ${{ parameters.description }}
+        repoVisibility: public
+        defaultBranch: main
+        protectDefaultBranch: false
+        protectEnforceAdmins: false
+
+    - id: register
+      name: Register in Catalog
+      action: catalog:register
+      input:
+        catalogInfoUrl: https://github.com/${{ (parameters.repoUrl | parseRepoUrl).owner }}/${{ parameters.name }}/blob/main/catalog-info.yaml
+
+  output:
+    links:
+      - title: GitHub Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: GitHub Actions
+        url: ${{ steps.publish.output.remoteUrl }}/actions
+      - title: Open in Catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}

@@ -1,0 +1,128 @@
+app:
+  title: Demo IDP - Cloud Native Latam
+  baseUrl: http://localhost:3000
+
+organization:
+  name: Cloud Native Latam Demo
+
+backend:
+  baseUrl: http://localhost:7007
+  listen:
+    port: 7007
+    host: 0.0.0.0
+  csp:
+    connect-src: ["'self'", 'http:', 'https:']
+  cors:
+    origin: http://localhost:3000
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+  database:
+    client: better-sqlite3
+    connection: ':memory:'
+
+integrations:
+  github:
+    - host: github.com
+      token: ${GITHUB_TOKEN}
+
+proxy:
+  endpoints:
+    '/quay/api':
+      target: https://quay.io
+      headers:
+        X-Requested-With: 'XMLHttpRequest'
+      changeOrigin: true
+      secure: true
+    '/argocd/api':
+      target: http://localhost:8080/api/v1
+      changeOrigin: true
+      headers:
+        Cookie:
+          $env: ARGOCD_AUTH_TOKEN
+
+techdocs:
+  builder: 'local'
+  generator:
+    runIn: 'local'
+  publisher:
+    type: 'local'
+
+auth:
+  environment: development
+  dangerouslyAllowSignInWithoutUserInCatalog: true
+  providers:
+    guest: {}
+    github:
+      development:
+        clientId: ${AUTH_GITHUB_CLIENT_ID}
+        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+
+scaffolder:
+  defaultAuthor:
+    name: Backstage Scaffolder
+    email: scaffolder@backstage.local
+  defaultCommitMessage: 'Initial commit from Backstage Scaffolder'
+  EXPERIMENTAL_defaultScaffolderTaskTimeout: PT5M
+
+catalog:
+  import:
+    entityFilename: catalog-info.yaml
+    pullRequestBranchName: backstage-integration
+  rules:
+    - allow: [Component, System, API, Resource, Location, Template, Group, User]
+  providers:
+    # Uncomment and configure with your GitHub organization
+    # githubOrg:
+    #   id: your-org
+    #   githubUrl: https://github.com
+    #   orgs: ['your-org']
+    #   schedule:
+    #     frequency: { minutes: 1 }
+    #     timeout: { minutes: 3 }
+    # github:
+    #   yourOrg:
+    #     organization: 'your-org'
+    #     catalogPath: '/catalog-info.yaml'
+    #     filters:
+    #       branch: 'main'
+    #       repository: '.*'
+    #     schedule:
+    #       frequency: { minutes: 1 }
+    #       timeout: { minutes: 3 }
+  locations:
+    - type: file
+      target: ../../catalog-entities/guests-group.yaml
+      rules:
+        - allow: [Group]
+    - type: file
+      target: ../../templates/nodejs-service/template.yaml
+      rules:
+        - allow: [Template]
+    - type: file
+      target: ../../templates/event-landing/template.yaml
+      rules:
+        - allow: [Template]
+
+quay:
+  uiUrl: 'https://quay.io'
+
+argocd:
+  baseUrl: http://localhost:8080
+  username: admin
+  password: ${ARGOCD_PASSWORD}
+  appLocatorMethods:
+    - type: 'config'
+      instances:
+        - name: main
+          url: http://localhost:8080
+          username: admin
+          password: ${ARGOCD_PASSWORD}
+
+kubernetes:
+  serviceLocatorMethod:
+    type: 'multiTenant'
+  clusterLocatorMethods:
+    - type: 'localKubectlProxy'
+
+permission:
+  enabled: false
