@@ -95,6 +95,14 @@ catalog:
       rules:
         - allow: [Group]
     - type: file
+      target: ../../catalog-entities/demo-api.yaml
+      rules:
+        - allow: [API]
+    - type: file
+      target: ../../catalog-entities/domain-system.yaml
+      rules:
+        - allow: [Domain, System, Component, Resource]
+    - type: file
       target: ../../templates/nodejs-service/template.yaml
       rules:
         - allow: [Template]

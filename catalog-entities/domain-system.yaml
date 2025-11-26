@@ -1,0 +1,103 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: cloud-native-demo
+  description: Main domain for Cloud Native demo - Example IDP implementation
+  tags:
+    - cloud-native
+    - demo
+    - community
+spec:
+  owner: guests
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: landing-system
+  description: Landing pages system for Cloud Native events
+  tags:
+    - landing
+    - events
+    - gitops
+  links:
+    - url: http://localhost:8080
+      title: ArgoCD Dashboard
+      icon: cloud
+spec:
+  owner: guests
+  domain: cloud-native-demo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: platform-system
+  description: Internal platform system (Backstage IDP)
+  tags:
+    - platform
+    - idp
+    - backstage
+spec:
+  owner: guests
+  domain: cloud-native-demo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backstage-idp
+  description: Internal Developer Platform based on Backstage
+  tags:
+    - backstage
+    - idp
+    - platform
+  links:
+    - url: http://localhost:3000
+      title: Backstage UI
+      icon: dashboard
+    - url: http://localhost:7007
+      title: Backstage Backend
+      icon: api
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: platform-system
+  providesApis:
+    - events-api
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kind-cluster
+  description: Local Kubernetes cluster using Kind
+  tags:
+    - kubernetes
+    - kind
+    - local
+spec:
+  type: kubernetes-cluster
+  owner: guests
+  system: platform-system
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: quay-registry
+  description: Container registry on Quay.io for landing images
+  tags:
+    - quay
+    - registry
+    - containers
+  links:
+    - url: https://quay.io
+      title: Quay.io
+      icon: docker
+spec:
+  type: container-registry
+  owner: guests
+  system: landing-system
